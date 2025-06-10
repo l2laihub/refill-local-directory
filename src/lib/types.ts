@@ -28,6 +28,22 @@ export interface City {
   image_url?: string;
 }
 
+export interface StoreHours {
+  open: string;
+  close: string;
+  closed: boolean;
+}
+
+export interface StoreHoursOfOperation {
+  monday: StoreHours;
+  tuesday: StoreHours;
+  wednesday: StoreHours;
+  thursday: StoreHours;
+  friday: StoreHours;
+  saturday: StoreHours;
+  sunday: StoreHours;
+}
+
 export interface Store {
   id: string;
   name: string;
@@ -39,7 +55,7 @@ export interface Store {
   city_id: string;
   latitude: number;
   longitude: number;
-  hours_of_operation: string;
+  hours_of_operation: string | StoreHoursOfOperation;
   what_to_bring: string;
   products: string[];
   created_at: string;

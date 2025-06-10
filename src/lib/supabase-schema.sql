@@ -13,7 +13,7 @@ CREATE TABLE cities (
 );
 
 -- Create an index on the slug for faster lookups
-CREATE INDEX cities_slug_idx ON cities (slug);
+CREATE INDEX IF NOT EXISTS cities_slug_idx ON cities (slug);
 
 -- Stores table
 CREATE TABLE stores (
@@ -38,7 +38,7 @@ CREATE TABLE stores (
 );
 
 -- Create an index on city_id for faster lookups
-CREATE INDEX stores_city_id_idx ON stores (city_id);
+CREATE INDEX IF NOT EXISTS stores_city_id_idx ON stores (city_id);
 
 -- Waitlist table
 CREATE TABLE waitlist (
@@ -60,7 +60,7 @@ CREATE TABLE city_requests (
 );
 
 -- Create a unique constraint on city_name, state, country
-CREATE UNIQUE INDEX city_requests_unique_idx ON city_requests (city_name, state, country);
+CREATE UNIQUE INDEX IF NOT EXISTS city_requests_unique_idx ON city_requests (city_name, state, country);
 
 -- Function to update the updated_at column
 CREATE OR REPLACE FUNCTION update_modified_column()

@@ -4,21 +4,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import posthog from 'posthog-js';
 import App from './App';
 import './index.css';
+import analytics from './lib/analytics';
 
-// Initialize PostHog for analytics
-const posthogApiKey = import.meta.env.VITE_POSTHOG_API_KEY;
-const posthogHost = import.meta.env.VITE_POSTHOG_HOST || 'https://app.posthog.com';
+// Initialize analytics
+analytics.initAnalytics();
 
-if (posthogApiKey) {
-  posthog.init(posthogApiKey, {
-    api_host: posthogHost,
-    loaded: (posthog) => {
-      if (import.meta.env.DEV) {
-        // In development, disable capturing analytics
-        posthog.opt_out_capturing();
-      }
-    }
-  });
+// In development mode, opt-out of capturing
+if (import.meta.env.DEV) {
+  posthog.opt_out_capturing();
 }
 
 // Create a client for React Query

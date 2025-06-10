@@ -21,18 +21,46 @@ export const cityServices = {
   
   // Get city by slug
   async getCityBySlug(slug: string): Promise<City | null> {
-    const { data, error } = await supabase
+    // Normalize the slug to lowercase and handle hyphenation
+    const normalizedSlug = slug.toLowerCase().replace(/\s+/g, '-');
+    
+    console.log(`Fetching city with normalized slug: ${normalizedSlug}`);
+    
+    // First try with exact slug match
+    let { data, error } = await supabase
       .from('cities')
       .select('*')
-      .eq('slug', slug)
-      .single();
+      .eq('slug', normalizedSlug);
     
     if (error) {
-      console.error(`Error fetching city with slug ${slug}:`, error);
+      console.error(`Error fetching city with slug ${normalizedSlug}:`, error);
       return null;
     }
     
-    return data;
+    // If we found exactly one result, return it
+    if (data && data.length === 1) {
+      return data[0];
+    }
+    
+    // If we didn't find an exact match, try a more flexible approach
+    // by matching the name directly
+    ({ data, error } = await supabase
+      .from('cities')
+      .select('*')
+      .ilike('name', slug));
+    
+    if (error) {
+      console.error(`Error fetching city with name ${slug}:`, error);
+      return null;
+    }
+    
+    // Return the first match if any were found
+    if (data && data.length > 0) {
+      return data[0];
+    }
+    
+    console.error(`No city found with slug ${normalizedSlug} or name ${slug}`);
+    return null;
   },
   
   // Request a new city
