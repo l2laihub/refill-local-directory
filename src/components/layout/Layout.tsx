@@ -1,11 +1,13 @@
-import type { PropsWithChildren } from 'react';
+import { Outlet } from 'react-router-dom';
 import Footer from '../Footer';
 import Header from '../Header';
 
-const Layout = ({ children }: PropsWithChildren) => (
+const Layout = () => (
   <div className="min-h-screen bg-gradient-to-b from-warm-50 to-white">
     <Header />
-    <main>{children}</main>
+    <main>
+      <Outlet />
+    </main>
     <Footer />
   </div>
 );

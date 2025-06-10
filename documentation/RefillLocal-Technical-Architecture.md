@@ -1,315 +1,166 @@
 # RefillLocal - Technical Architecture
 
-This document outlines the technical architecture for the RefillLocal platform, detailing the technology stack, system components, data models, and infrastructure considerations.
+This document outlines the technical architecture of the RefillLocal application, including the technology stack, project structure, data models, and key architectural decisions.
 
 ## Technology Stack
 
 ### Frontend
-- **Framework**: React with TypeScript
-- **Styling**: Tailwind CSS for utility-first styling
-- **State Management**: React Context API with hooks for simpler state needs, Redux for more complex state management
-- **Routing**: React Router for client-side routing
-- **UI Components**: Custom component library with design system
-- **Form Handling**: React Hook Form for efficient form state management
-- **Data Fetching**: React Query for server state management
-- **Build Tool**: Vite for fast development and optimized production builds
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **Routing**: React Router v6
+- **State Management**: React Query
+- **Icons**: Lucide React
 
 ### Backend
-- **API Layer**: Node.js with Express
-- **Authentication**: JWT-based authentication with refresh tokens (via Supabase Auth)
-- **Database**: Supabase (PostgreSQL) for relational data storage
-- **Search**: Supabase full-text search capabilities
-- **File Storage**: Supabase Storage for image and asset storage
-- **Caching**: Supabase edge functions and caching
-- **Email Service**: Resend for transactional emails and notifications
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Storage**: Supabase Storage
+- **Serverless Functions**: Supabase Edge Functions (as needed)
 
-### DevOps
-- **Hosting**: Netlify for frontend, Vercel for backend services
-- **CI/CD**: GitHub Actions for automated testing and deployment
-- **Monitoring**: PostHog for error tracking, user analytics, and feature flags
-- **Performance**: Lighthouse for performance monitoring
-- **Security**: HTTPS, Content Security Policy, regular dependency audits
+### Third-Party Services
+- **Email**: Resend
+- **Analytics**: PostHog
+- **Hosting**: Netlify
+- **Maps**: (TBD - likely Google Maps or Mapbox)
 
-## System Architecture
-
-### Component Diagram
+## Project Structure
 
 ```
-┌────────────────────┐       ┌────────────────────┐
-│                    │       │                    │
-│   Client Browser   │◄─────►│   Frontend App     │
-│                    │       │   (React + Vite)   │
-└────────────────────┘       └─────────┬──────────┘
-                                       │
-                                       ▼
-                             ┌────────────────────┐
-                             │                    │
-                             │   API Gateway      │
-                             │   (Express)        │
-                             │                    │
-                             └─────────┬──────────┘
-                                       │
-                       ┌───────────────┼───────────────┐
-                       │               │               │
-                       ▼               ▼               ▼
-             ┌────────────────┐ ┌────────────┐ ┌────────────────┐
-             │                │ │            │ │                │
-             │  Store Service │ │  User      │ │  Search        │
-             │                │ │  Service   │ │  Service       │
-             └───────┬────────┘ └─────┬──────┘ └────────┬───────┘
-                     │                │                 │
-                     └────────────────┼─────────────────┘
-                                      │
-                                      ▼
-                             ┌────────────────────┐
-                             │                    │
-                             │  Supabase          │
-                             │  (PostgreSQL + Storage) │
-                             │                    │
-                             └────────────────────┘
+src/
+├── components/           # Reusable UI components
+│   ├── layout/           # Layout components (header, footer, etc.)
+│   └── ...               # Feature-specific components
+├── pages/                # Page components
+├── lib/                  # Shared utilities and services
+│   ├── constants.ts      # Application constants
+│   ├── router.tsx        # Route definitions
+│   ├── services.ts       # API service functions
+│   ├── supabase.ts       # Supabase client configuration
+│   └── types.ts          # TypeScript type definitions
+├── assets/               # Static assets (images, fonts, etc.)
+├── hooks/                # Custom React hooks
+├── App.tsx               # Root component
+└── main.tsx              # Application entry point
 ```
-
-### Microservices
-
-The backend is structured as a collection of microservices:
-
-1. **Store Service**
-   - Manages store listings
-   - Handles CRUD operations for store data
-   - Processes store verification and moderation
-
-2. **User Service**
-   - Manages user accounts and authentication
-   - Handles user profiles and preferences
-   - Processes waitlist signups and notifications
-
-3. **Search Service**
-   - Manages city and store search functionality
-   - Handles search indexing and optimization
-   - Processes filtering and sorting of results
-
-4. **Contribution Service**
-   - Manages community contributions
-   - Handles the submission and moderation workflow
-   - Processes attribution and notifications
-
-5. **Notification Service**
-   - Manages email communications
-   - Handles transactional and marketing emails
-   - Processes notification preferences
 
 ## Data Models
-
-### Store
-```typescript
-interface Store {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  logo: string;
-  images: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-    coordinates: {
-      latitude: number;
-      longitude: number;
-    }
-  };
-  contact: {
-    phone: string;
-    email: string;
-    website: string;
-    socialMedia: {
-      instagram?: string;
-      facebook?: string;
-      twitter?: string;
-    }
-  };
-  hours: {
-    monday: { open: string; close: string; closed: boolean };
-    tuesday: { open: string; close: string; closed: boolean };
-    wednesday: { open: string; close: string; closed: boolean };
-    thursday: { open: string; close: string; closed: boolean };
-    friday: { open: string; close: string; closed: boolean };
-    saturday: { open: string; close: string; closed: boolean };
-    sunday: { open: string; close: string; closed: boolean };
-  };
-  categories: string[];
-  products: {
-    category: string;
-    items: string[];
-  }[];
-  whatToBring: string[];
-  reviews: {
-    userId: string;
-    rating: number;
-    comment: string;
-    date: Date;
-  }[];
-  averageRating: number;
-  verified: boolean;
-  featured: boolean;
-  createdBy: string; // userId
-  createdAt: Date;
-  updatedAt: Date;
-}
-```
-
-### User
-```typescript
-interface User {
-  id: string;
-  email: string;
-  password: string; // hashed
-  name: string;
-  avatar?: string;
-  city?: string;
-  accountType: 'user' | 'storeOwner' | 'admin';
-  favoriteStores: string[]; // storeIds
-  contributions: {
-    storeId: string;
-    contributionType: 'created' | 'edited' | 'reviewed';
-    date: Date;
-  }[];
-  notifications: {
-    enabled: boolean;
-    cityUpdates: boolean;
-    storeUpdates: boolean;
-    marketing: boolean;
-  };
-  referralCode: string;
-  referredBy?: string; // userId
-  referrals: string[]; // userIds
-  createdAt: Date;
-  updatedAt: Date;
-}
-```
 
 ### City
 ```typescript
 interface City {
   id: string;
   name: string;
+  slug: string;
   state: string;
   country: string;
-  slug: string;
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  };
-  active: boolean;
-  storeCount: number;
-  featured: boolean;
-  waitlistCount: number;
-  launchDate?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  is_active: boolean;
+  created_at: string;
+  image_url?: string;
 }
 ```
 
-## API Endpoints
+### Store
+```typescript
+interface Store {
+  id: string;
+  name: string;
+  description: string;
+  website_url?: string;
+  phone?: string;
+  email?: string;
+  address: string;
+  city_id: string;
+  latitude: number;
+  longitude: number;
+  hours_of_operation: string;
+  what_to_bring: string;
+  products: string[];
+  created_at: string;
+  updated_at: string;
+  is_verified: boolean;
+  image_url?: string;
+  added_by_user_id?: string;
+}
+```
 
-### Store API
-- `GET /api/stores` - Get all stores (with pagination)
-- `GET /api/stores/:id` - Get store by ID
-- `GET /api/cities/:citySlug/stores` - Get stores by city
-- `POST /api/stores` - Create new store
-- `PUT /api/stores/:id` - Update store
-- `DELETE /api/stores/:id` - Delete store
-- `POST /api/stores/:id/review` - Add review to store
+### WaitlistEntry
+```typescript
+interface WaitlistEntry {
+  id: string;
+  email: string;
+  city: string;
+  created_at: string;
+  referred_by?: string;
+}
+```
 
-### User API
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-- `GET /api/users/me` - Get current user
-- `PUT /api/users/me` - Update user profile
-- `GET /api/users/me/favorites` - Get user's favorite stores
-- `POST /api/users/me/favorites/:storeId` - Add store to favorites
-- `DELETE /api/users/me/favorites/:storeId` - Remove store from favorites
+### CityRequest
+```typescript
+interface CityRequest {
+  id: string;
+  city_name: string;
+  state: string;
+  country: string;
+  votes: number;
+  created_at: string;
+}
+```
 
-### Search API
-- `GET /api/search/cities` - Search cities
-- `GET /api/search/stores` - Search stores
-- `GET /api/cities` - Get all active cities
+## Architecture Decisions
 
-### Waitlist API
-- `POST /api/waitlist` - Join waitlist
-- `POST /api/cities/request` - Request a city
+### Database Schema
+- Supabase PostgreSQL database with the following tables:
+  - `cities` - Stores city information
+  - `stores` - Stores refill/zero-waste store information
+  - `waitlist` - Stores email signups for waitlist
+  - `city_requests` - Stores requests for new cities
+- Row-Level Security (RLS) policies for data access control
+- Indexes on frequently queried columns for performance
+
+### Authentication & Authorization
+- Supabase Auth for user authentication
+- Anonymous access for public features
+- Role-based access control for admin functions
+- JWT tokens for authenticated requests
+
+### Frontend Architecture
+- Component-based architecture with reusable UI components
+- React Router for client-side routing
+- React Query for server state management and caching
+- Custom hooks for shared logic
+
+### API Services
+- Service functions for interacting with Supabase
+- Organized by domain (city, store, waitlist, etc.)
+- Error handling and logging
+
+### Deployment Strategy
+- Netlify for hosting the frontend
+- Supabase for backend services
+- Environment-specific configuration via environment variables
+- CI/CD pipeline for automated deployments
 
 ## Security Considerations
 
-1. **Authentication and Authorization**
-   - JWT-based authentication with short-lived access tokens
-   - Role-based access control for admin functions
-   - Protected routes for authenticated users
+- Environment variables for sensitive information
+- Row-Level Security policies in Supabase
+- CORS configuration
+- Content Security Policy
+- HTTPS enforcement
+- Input validation and sanitization
 
-2. **Data Protection**
-   - HTTPS for all communications
-   - Input validation and sanitization
-   - Protection against common web vulnerabilities (XSS, CSRF)
+## Performance Optimization
 
-3. **API Security**
-   - Rate limiting to prevent abuse
-   - CORS configuration
-   - API keys for third-party integrations
+- Optimistic UI updates for better user experience
+- React Query caching for reduced API calls
+- Lazy loading of images and components
+- Code splitting for faster initial load
+- Tailwind CSS purging for smaller CSS bundles
 
-## Scalability Considerations
+## Monitoring & Analytics
 
-1. **Database Scaling**
-   - Leveraging Supabase's PostgreSQL scaling capabilities
-   - Read replicas for improved read performance
-   - Optimized indexing strategy for common queries
-   - Connection pooling for efficient resource utilization
-
-2. **Caching Strategy**
-   - Supabase edge functions and caching
-   - CDN for static assets and images
-   - Browser caching with appropriate cache headers
-   - Leveraging Supabase's built-in caching mechanisms
-
-3. **Infrastructure Scaling**
-   - Utilizing Supabase's managed infrastructure
-   - Vercel serverless functions for API endpoints
-   - Auto-scaling based on traffic patterns
-   - Geo-distribution for reduced latency
-
-## Monitoring and Analytics
-
-1. **Performance Monitoring**
-   - Server-side performance metrics
-   - Client-side performance tracking
-   - Real-time error monitoring with PostHog
-
-2. **User Analytics**
-   - Conversion funnel tracking through PostHog
-   - Feature usage analytics with session recordings
-   - A/B testing and feature flag experiments via PostHog
-
-3. **Business Metrics**
-   - Store listing growth tracking
-   - User growth and engagement metrics
-   - City coverage and expansion metrics
-   - Cohort analysis via PostHog
-
-## Development Workflow
-
-1. **Version Control**
-   - Git-based workflow with feature branches
-   - Pull request reviews
-   - Semantic versioning
-
-2. **Testing Strategy**
-   - Unit tests for business logic
-   - Integration tests for API endpoints
-   - End-to-end tests for critical user flows
-   - Accessibility testing
-
-3. **Deployment Strategy**
-   - Staging environment for QA
-   - Canary deployments for risk mitigation
-   - Automated rollbacks for failed deployments
+- PostHog for user behavior analytics
+- Error tracking and reporting
+- Performance monitoring
+- Feature usage tracking

@@ -1,18 +1,8 @@
-import ComingSoon from './components/ComingSoon';
-import EmailSignup from './components/EmailSignup';
-import HowItWorks from './components/HowItWorks';
-import WhyRefillLocal from './components/WhyRefillLocal';
-import Layout from './components/layout/Layout';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './lib/router';
 
 function App() {
-  return (
-    <Layout>
-      <HowItWorks />
-      <WhyRefillLocal />
-      <ComingSoon />
-      <EmailSignup />
-    </Layout>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
