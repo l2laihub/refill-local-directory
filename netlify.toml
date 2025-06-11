@@ -1,8 +1,8 @@
 # Minimal Netlify configuration
 
 [build]
-  # Use our custom node script for more reliable builds
-  command = "node netlify-build.js"
+  # Use our simple shell script for the most reliable builds
+  command = "bash netlify-build.sh"
   publish = "dist"
   
 # Basic environment settings

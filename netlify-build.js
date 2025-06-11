@@ -1,5 +1,6 @@
-// Simple build script for Netlify
-const { execSync } = require('child_process');
+// Simple build script for Netlify (ES module version)
+import { execSync } from 'child_process';
+import fs from 'fs';
 
 console.log('Starting build process...');
 
@@ -23,7 +24,6 @@ try {
 
 // Create a minimal vite.config.js file (JavaScript instead of TypeScript)
 console.log('\nCreating minimal vite.config.js...');
-const fs = require('fs');
 fs.writeFileSync('vite.config.js', `
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
