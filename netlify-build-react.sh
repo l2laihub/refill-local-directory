@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build script for Netlify to properly build the React application
 
-set -e # Exit immediately if a command exits with a non-zero status
+# Don't set -e here, we want to handle errors gracefully
 
 echo "Starting React build process..."
 
@@ -41,9 +41,10 @@ cp -r public/* dist-backup/ || true
 # Run the build with verbose output
 echo "Building React application..."
 NODE_ENV=production npx vite build --debug
+BUILD_RESULT=$?
 
 # If build fails, use our backup static site
-if [ $? -ne 0 ]; then
+if [ $BUILD_RESULT -ne 0 ]; then
   echo "React build failed, using static fallback..."
   mkdir -p dist
   cp -r dist-backup/* dist/ || true

@@ -1,8 +1,8 @@
 # Minimal Netlify configuration
 
 [build]
-  # Use our improved build script that attempts to build the React app with fallback
-  command = "bash netlify-build-react.sh"
+  # Use our reliable static build script until we can resolve the Vite build issues
+  command = "bash static-build.sh"
   publish = "dist"
   
 # Basic environment settings
