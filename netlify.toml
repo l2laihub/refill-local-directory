@@ -1,8 +1,8 @@
 # Minimal Netlify configuration
 
 [build]
-  # Simple build command that works with Netlify's default Node.js setup
-  command = "npm install && npm install vite @vitejs/plugin-react --no-save && npx vite build"
+  # Use our custom node script for more reliable builds
+  command = "node netlify-build.js"
   publish = "dist"
   
 # Basic environment settings

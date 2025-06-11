@@ -24,8 +24,9 @@ This document tracks the implementation progress of the RefillLocal project, sho
   - Added deployment documentation to README.md
   - Fixed Netlify deployment issues:
     - Added proper _redirects file for SPA routing
-    - Simplified Netlify configuration to ensure reliable builds
-    - Configured direct dependency installation in build command
+    - Created custom Node.js build script for reliable Netlify deployment
+    - Simplified Netlify configuration to the essential settings
+    - Configured dynamic vite.config.js generation during build
     - Added proper environment variable documentation
     - Ensured SPA routing works correctly with page refreshes
 - Optimized build process for better performance:
