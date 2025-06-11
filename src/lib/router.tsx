@@ -1,12 +1,22 @@
 import { createBrowserRouter } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import Layout from '../components/layout/Layout';
-import HomePage from '../pages/HomePage.tsx';
-import CityPage from '../pages/CityPage.tsx';
-import StorePage from '../pages/StorePage.tsx';
-import AddStorePage from '../pages/AddStorePage.tsx';
-import CityRequestPage from '../pages/CityRequestPage.tsx';
-import ComingSoonPage from '../pages/ComingSoonPage.tsx';
 import NotFoundPage from '../pages/NotFoundPage.tsx';
+
+// Lazy load page components for code splitting
+const HomePage = lazy(() => import('../pages/HomePage.tsx'));
+const CityPage = lazy(() => import('../pages/CityPage.tsx'));
+const StorePage = lazy(() => import('../pages/StorePage.tsx'));
+const AddStorePage = lazy(() => import('../pages/AddStorePage.tsx'));
+const CityRequestPage = lazy(() => import('../pages/CityRequestPage.tsx'));
+const ComingSoonPage = lazy(() => import('../pages/ComingSoonPage.tsx'));
+
+// Loading component for suspense fallback
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-pulse text-sage-600">Loading...</div>
+  </div>
+);
 
 export const router = createBrowserRouter([
   {
@@ -16,27 +26,51 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <HomePage />,
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <HomePage />
+          </Suspense>
+        ),
       },
       {
         path: 'cities/:citySlug',
-        element: <CityPage />,
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <CityPage />
+          </Suspense>
+        ),
       },
       {
         path: 'stores/:storeId',
-        element: <StorePage />,
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <StorePage />
+          </Suspense>
+        ),
       },
       {
         path: 'add-store',
-        element: <AddStorePage />,
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <AddStorePage />
+          </Suspense>
+        ),
       },
       {
         path: 'request-city',
-        element: <CityRequestPage />,
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <CityRequestPage />
+          </Suspense>
+        ),
       },
       {
         path: 'coming-soon',
-        element: <ComingSoonPage />,
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <ComingSoonPage />
+          </Suspense>
+        ),
       },
     ],
   },
