@@ -183,7 +183,7 @@ This document tracks the implementation progress of the RefillLocal project, sho
 
 ### Phase 2 Priorities
 1. Implement Community Contributions:
-   - Build "Add a Store" form
+   - ✅ Build "Add a Store" form
    - Create moderation system
 2. Add User Accounts functionality:
    - Set up authentication system

@@ -99,3 +99,8 @@ CREATE POLICY "Allow anonymous insert access to waitlist" ON waitlist
 ALTER TABLE city_requests ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow anonymous insert access to city_requests" ON city_requests
   FOR INSERT WITH CHECK (TRUE);
+
+-- Allow anonymous insert access to stores (for community submissions)
+CREATE POLICY "Allow anonymous insert access to stores" ON stores
+  FOR INSERT TO anon -- Explicitly for the anonymous role
+  WITH CHECK (is_verified = FALSE AND added_by_user_id IS NULL);

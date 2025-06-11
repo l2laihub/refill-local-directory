@@ -143,6 +143,32 @@ export const storeServices = {
     }
     
     return data;
+  },
+
+  // Add a new store
+  async addStore(storeData: Omit<Store, 'id' | 'created_at' | 'updated_at' | 'is_verified' | 'added_by_user_id'>): Promise<Store | null> {
+    const { data, error } = await supabase
+      .from('stores')
+      .insert([{
+        ...storeData,
+        is_verified: false, // New stores from community are not verified by default
+        // added_by_user_id will be null or handled later with auth
+      }])
+      .select()
+      .single(); // Return the created store
+
+    if (error) {
+      console.error('Error adding store:', error);
+      // Consider more specific error handling or re-throwing if needed by the UI
+      if (error.code === '23503' && error.message.includes('stores_city_id_fkey')) {
+        // Foreign key violation, likely invalid city_id
+        console.error('Error adding store: Invalid city_id provided.');
+        // Potentially throw a custom error or return a specific error object
+        // For now, just logging and returning null
+      }
+      return null;
+    }
+    return data;
   }
 };
 

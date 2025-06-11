@@ -1,21 +1,29 @@
 import { Mail, Leaf, Recycle } from 'lucide-react';
 import Logo from './Logo';
 import MobileNav from './MobileNav';
+import DesktopNav from './DesktopNav'; // Import DesktopNav
 import { Link } from 'react-router-dom';
 
 const Header = () => (
   <header className="relative overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-br from-sage-100/50 to-warm-100/30"></div>
-    <MobileNav />
-    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 md:pt-20 md:pb-28">
+    <div className="absolute inset-0 bg-gradient-to-br from-sage-100/50 to-warm-100/30 -z-10"></div>
+    
+    {/* Navigation Container */}
+    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <MobileNav />
+      <DesktopNav />
+    </div>
+
+    {/* Hero Content - Adjusted padding since nav is now part of this container */}
+    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-24 md:pt-12 md:pb-28">
       <div className="text-center">
-        {/* Logo */}
-        <div className="flex justify-center mb-8">
+        {/* Logo for mobile, as DesktopNav has its own */}
+        <div className="flex justify-center mb-8 md:hidden">
           <Link to="/">
-            <Logo size="large" className="hidden md:block" />
+            <Logo size="large" />
           </Link>
         </div>
-
+        
         {/* Headline */}
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-800 mb-6 leading-tight">
           Find Refill & Zero-Waste
@@ -28,8 +36,8 @@ const Header = () => (
           Discover places to shop plastic-free and live more sustainably.
         </p>
 
-        {/* CTA Button */}
-        <div className="inline-block">
+        {/* CTA Button - Hidden on desktop as DesktopNav has its own */}
+        <div className="inline-block md:hidden">
           <a
             href="#signup"
             className="inline-flex items-center px-6 py-3 sm:px-8 sm:py-4 bg-sage-500 text-white font-semibold rounded-full hover:bg-sage-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
