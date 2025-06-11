@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MapPin, Globe, Clock, Phone, Mail, ExternalLink, ArrowLeft } from 'lucide-react';
 import { cityServices, storeServices } from '../lib/services';
 import type { City, Store } from '../lib/types';
+import StoreFilters, { SortOption, FilterOption } from '../components/StoreFilters';
+import { trackEvent } from '../lib/analytics';
+import { SEO } from '../lib/seo';
 
 const CityPage: React.FC = () => {
   const { citySlug } = useParams<{ citySlug: string }>();
@@ -11,6 +14,8 @@ const CityPage: React.FC = () => {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeFilters, setActiveFilters] = useState<FilterOption[]>([]);
+  const [activeSort, setActiveSort] = useState<SortOption>('name-asc');
   
   useEffect(() => {
     const fetchCityData = async () => {
@@ -31,6 +36,12 @@ const CityPage: React.FC = () => {
         // Fetch stores for this city
         const storeData = await storeServices.getStoresByCity(cityData.id);
         setStores(storeData);
+
+        // Track city view with analytics
+        trackEvent('city_view', {
+          city_id: cityData.id,
+          city_name: cityData.name
+        });
         
       } catch (err) {
         console.error('Error fetching city data:', err);
@@ -48,6 +59,67 @@ const CityPage: React.FC = () => {
       word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     ).join(' ');
   };
+
+  // Extract all unique products from stores for filtering
+  const allProducts = useMemo(() => {
+    const productSet = new Set<string>();
+    
+    stores.forEach(store => {
+      store.products.forEach(product => {
+        productSet.add(product);
+      });
+    });
+    
+    return Array.from(productSet).sort();
+  }, [stores]);
+
+  // Apply filters and sorting to stores
+  const filteredAndSortedStores = useMemo(() => {
+    // First apply filters
+    let result = stores;
+    
+    if (activeFilters.length > 0) {
+      result = result.filter(store => 
+        activeFilters.some(filter => store.products.includes(filter))
+      );
+    }
+    
+    // Then apply sorting
+    return result.sort((a, b) => {
+      switch (activeSort) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'newest':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'oldest':
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        default:
+          return 0;
+      }
+    });
+  }, [stores, activeFilters, activeSort]);
+
+  const handleFilterChange = (filters: FilterOption[]) => {
+    setActiveFilters(filters);
+    
+    if (filters.length > 0) {
+      trackEvent('store_filter', {
+        city_id: city?.id,
+        filters
+      });
+    }
+  };
+
+  const handleSortChange = (sort: SortOption) => {
+    setActiveSort(sort);
+    
+    trackEvent('store_sort', {
+      city_id: city?.id,
+      sort
+    });
+  };
   
   if (loading) {
     return (
@@ -60,6 +132,10 @@ const CityPage: React.FC = () => {
   if (error || !city) {
     return (
       <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <SEO 
+          title="City Not Found"
+          description="Sorry, we couldn't find information for this city."
+        />
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">
             {error || 'City not found'}
@@ -81,6 +157,15 @@ const CityPage: React.FC = () => {
   
   return (
     <div className="min-h-screen">
+      <SEO 
+        title={`Refill Stores in ${formatCityName(city.name)}`}
+        description={`Discover plastic-free and zero-waste stores in ${city.name}, ${city.state}. Find places to shop sustainably and reduce your environmental impact.`}
+        canonicalUrl={`https://refilllocal.com/cities/${city.slug}`}
+        city={city.name}
+        state={city.state}
+        country={city.country}
+        ogType="website"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <button
@@ -104,11 +189,21 @@ const CityPage: React.FC = () => {
             Discover places to shop plastic-free and live more sustainably in {city.name}.
           </p>
         </div>
+
+        {stores.length > 0 && (
+          <StoreFilters
+            products={allProducts}
+            activeFilters={activeFilters}
+            activeSort={activeSort}
+            onFilterChange={handleFilterChange}
+            onSortChange={handleSortChange}
+          />
+        )}
         
         <div className="mt-8">
-          {stores.length > 0 ? (
+          {stores.length > 0 && filteredAndSortedStores.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {stores.map(store => (
+              {filteredAndSortedStores.map(store => (
                 <Link 
                   key={store.id}
                   to={`/stores/${store.id}`}
@@ -154,6 +249,19 @@ const CityPage: React.FC = () => {
                   </div>
                 </Link>
               ))}
+            </div>
+          ) : stores.length > 0 && filteredAndSortedStores.length === 0 ? (
+            <div className="text-center bg-sage-50 rounded-lg p-8 max-w-2xl mx-auto">
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">No Matching Stores</h3>
+              <p className="text-gray-600 mb-6">
+                No stores match your current filters. Try adjusting your filter criteria.
+              </p>
+              <button
+                onClick={() => setActiveFilters([])}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-sage-600 hover:bg-sage-700"
+              >
+                Clear Filters
+              </button>
             </div>
           ) : (
             <div className="text-center bg-sage-50 rounded-lg p-8 max-w-2xl mx-auto">

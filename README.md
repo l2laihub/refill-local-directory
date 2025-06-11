@@ -55,6 +55,46 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+## Deployment
+
+This project is set up for automatic deployment using Netlify CI/CD pipeline. Here's how the deployment process works:
+
+### CI/CD Pipeline
+
+- **GitHub Actions**: The project uses GitHub Actions for continuous integration and delivery.
+- **Netlify Integration**: Deployments are handled through Netlify with automatic preview deployments for pull requests.
+
+### Setting Up Netlify Deployment
+
+1. **Create a Netlify account** and connect your GitHub repository
+2. **Configure environment variables** in Netlify:
+   - `VITE_SUPABASE_URL`: Your Supabase project URL
+   - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+   - `VITE_POSTHOG_KEY`: Your PostHog API key
+   - `VITE_RESEND_API_KEY`: Your Resend email API key
+
+3. **Set up GitHub secrets** for GitHub Actions:
+   - `NETLIFY_AUTH_TOKEN`: Generate from Netlify user settings
+   - `NETLIFY_SITE_ID`: Find in your Netlify site settings
+
+### Manual Deployment
+
+You can also deploy manually:
+
+```sh
+# Install Netlify CLI
+npm install -g netlify-cli
+
+# Login to Netlify
+netlify login
+
+# Build the project
+npm run build
+
+# Deploy to Netlify
+netlify deploy --prod
+```
+
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.

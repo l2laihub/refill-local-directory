@@ -4,10 +4,16 @@ import WhyRefillLocal from '../components/WhyRefillLocal';
 import ComingSoon from '../components/ComingSoon';
 import EmailSignup from '../components/EmailSignup';
 import CitySearch from '../components/CitySearch';
+import { SEO } from '../lib/seo';
 
 const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen">
+      <SEO 
+        title="Find Refill & Zero-Waste Stores Near You"
+        description="Discover local refill and zero-waste stores where you can shop plastic-free, reduce waste, and live more sustainably. Search for stores in your city."
+        canonicalUrl="https://refilllocal.com"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero section with city search */}
         <div className="text-center mb-16">

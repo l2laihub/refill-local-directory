@@ -5,6 +5,7 @@ import { storeServices, cityServices } from '../lib/services';
 import { supabase } from '../lib/supabase';
 import type { Store, City } from '../lib/types';
 import analytics from '../lib/analytics';
+import { SEO } from '../lib/seo';
 
 const StorePage: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();
@@ -82,6 +83,10 @@ const StorePage: React.FC = () => {
   if (error || !store) {
     return (
       <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <SEO 
+          title="Store Not Found"
+          description="Sorry, we couldn't find information for this store."
+        />
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">
             {error || 'Store not found'}
@@ -103,6 +108,15 @@ const StorePage: React.FC = () => {
   
   return (
     <div className="min-h-screen">
+      <SEO 
+        title={store.name}
+        description={`${store.description.substring(0, 150)}${store.description.length > 150 ? '...' : ''}`}
+        canonicalUrl={`https://refilllocal.com/stores/${store.id}`}
+        city={city?.name}
+        state={city?.state}
+        country={city?.country}
+        ogType="article"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           {city && (
