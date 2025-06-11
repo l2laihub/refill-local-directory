@@ -38,7 +38,6 @@ This document tracks the implementation progress of the RefillLocal project, sho
 - Added analytics tracking for city searches
 
 #### ⏳ Pending
-- Implementing "Request My City" functionality
 - Add filtering options for cities
 
 ### 2. Store Listings
@@ -74,10 +73,13 @@ This document tracks the implementation progress of the RefillLocal project, sho
 #### ✅ Completed
 - Defined CityRequest data model in types.ts
 - Created city_requests table schema for Supabase
+- Implemented city request form
+- Created CityRequestForm component
+- Added city request page with form and list
+- Implemented voting mechanism for requested cities
+- Added SQL function for incrementing votes
 
 #### ⏳ Pending
-- Implementing city request form
-- Voting mechanism for requested cities
 - Admin panel for city request management
 
 ### 5. UI Components
@@ -130,6 +132,7 @@ This document tracks the implementation progress of the RefillLocal project, sho
    - ✅ Finalized search interface with autocomplete
    - ✅ Completed city validation against available cities
    - ✅ Added "city not found" state handling
+   - ✅ Implemented "Request My City" functionality
 3. ✅ Finished Store Listings core functionality:
    - ✅ Completed store profile pages
    - ⏳ Implement store filtering and sorting (pending)
