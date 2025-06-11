@@ -1,7 +1,7 @@
 # Standard Netlify configuration for React/Vite app
 
 [build]
-  command = "npm install && npm run build"
+  command = "npm install --include=dev && npm run build"
   publish = "dist"
   
 [build.environment]
