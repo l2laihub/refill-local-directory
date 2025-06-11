@@ -184,15 +184,15 @@ This document tracks the implementation progress of the RefillLocal project, sho
 ### Phase 2 Priorities
 1. Implement Community Contributions:
    - ✅ Build "Add a Store" form
-   - Create moderation system
+   - ✅ Create moderation system
 2. Add User Accounts functionality:
-   - Set up authentication system
-   - Create user profiles
+   - ✅ Set up authentication system
+   - ✅ Create user profiles
 3. Develop Content Management:
-   - Build admin dashboard
-   - Implement role-based permissions
-4. Add PWA features
-5. Implement referral program
+   - ✅ Build admin dashboard
+   - ✅ Implement role-based permissions (via Stored Procedures for CUD & client-side route/UI guards)
+4. ✅ Add PWA features (Manifest, Service Worker via vite-plugin-pwa)
+5. ✅ Implement referral program (Backend schema, signup integration)
 
 ### Phase 3 Priorities
 1. Enhance Community Contributions:

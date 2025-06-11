@@ -12,6 +12,8 @@
     "netlify:build": "npm install && vite build"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.50.0",
     "@tanstack/react-query": "^5.80.6",
     "lucide-react": "^0.344.0",
@@ -41,6 +43,7 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
-    "vite": "^5.4.2"
+    "vite": "^5.4.2",
+    "vite-plugin-pwa": "^1.0.0"
   }
 }

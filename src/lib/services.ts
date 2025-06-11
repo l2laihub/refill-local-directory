@@ -145,30 +145,92 @@ export const storeServices = {
     return data;
   },
 
-  // Add a new store
-  async addStore(storeData: Omit<Store, 'id' | 'created_at' | 'updated_at' | 'is_verified' | 'added_by_user_id'>): Promise<Store | null> {
+  // Get all unverified stores for moderation
+  async getUnverifiedStores(): Promise<Store[]> {
     const { data, error } = await supabase
       .from('stores')
-      .insert([{
-        ...storeData,
-        is_verified: false, // New stores from community are not verified by default
-        // added_by_user_id will be null or handled later with auth
-      }])
-      .select()
-      .single(); // Return the created store
+      .select('*, cities (name, slug)') // Fetch related city name for context
+      .eq('is_verified', false)
+      .order('created_at', { ascending: true });
 
     if (error) {
-      console.error('Error adding store:', error);
-      // Consider more specific error handling or re-throwing if needed by the UI
-      if (error.code === '23503' && error.message.includes('stores_city_id_fkey')) {
-        // Foreign key violation, likely invalid city_id
-        console.error('Error adding store: Invalid city_id provided.');
-        // Potentially throw a custom error or return a specific error object
-        // For now, just logging and returning null
+      console.error('Error fetching unverified stores:', error);
+      return [];
+    }
+    // Ensure hours_of_operation is treated as string if it's JSONB from DB
+    return (data?.map(store => ({
+      ...store,
+      hours_of_operation: typeof store.hours_of_operation === 'object'
+        ? JSON.stringify(store.hours_of_operation)
+        : store.hours_of_operation
+    })) || []) as Store[];
+  },
+
+  // Approve a store submission by calling stored procedure
+  async approveStore(storeId: string): Promise<Store | null> {
+    const { data, error } = await supabase.rpc('approve_submitted_store', {
+      p_store_id: storeId,
+    });
+
+    if (error) {
+      console.error(`Error approving store ${storeId} via RPC:`, error);
+      return null;
+    }
+    return data as Store | null;
+  },
+
+  // Reject (delete) a store submission by calling stored procedure
+  async rejectStore(storeId: string): Promise<boolean> {
+    const { error } = await supabase.rpc('reject_submitted_store', {
+      p_store_id: storeId,
+    });
+
+    if (error) {
+      console.error(`Error rejecting store ${storeId} via RPC:`, error);
+      return false;
+    }
+    return true;
+  },
+
+  // Add a new store by calling stored procedure
+  async addStore(
+    storeData: Omit<Store, 'id' | 'created_at' | 'updated_at' | 'is_verified' | 'added_by_user_id'>,
+    submitterUserId?: string | null
+  ): Promise<Store | null> {
+    const params = {
+      p_name: storeData.name,
+      p_description: storeData.description,
+      p_address: storeData.address,
+      p_city_id: storeData.city_id,
+      p_latitude: storeData.latitude,
+      p_longitude: storeData.longitude,
+      // Ensure hours_of_operation is a string for the RPC call, as the form provides it as such.
+      // The SP will attempt to_jsonb conversion.
+      p_hours_of_operation: typeof storeData.hours_of_operation === 'string'
+        ? storeData.hours_of_operation
+        : JSON.stringify(storeData.hours_of_operation),
+      p_what_to_bring: storeData.what_to_bring,
+      p_products: storeData.products,
+      p_website_url: storeData.website_url || null,
+      p_phone: storeData.phone || null,
+      p_email: storeData.email || null,
+      p_image_url: storeData.image_url || null,
+      p_submitter_user_id: submitterUserId || null,
+    };
+
+    const { data, error } = await supabase.rpc('add_store_submission', params);
+
+    if (error) {
+      console.error('Error adding store via RPC:', error);
+      // Specific error handling for foreign key or other known issues can be added here
+      if (error.message.includes('violates foreign key constraint "stores_city_id_fkey"')) {
+         console.error('Error adding store: Invalid city_id provided.');
+      } else if (error.message.includes('invalid input syntax for type json')) {
+        console.error('Error adding store: Hours of operation format is invalid for JSON conversion.');
       }
       return null;
     }
-    return data;
+    return data as Store | null;
   }
 };
 

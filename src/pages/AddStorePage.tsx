@@ -3,6 +3,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import { Store, City } from '../lib/types';
 import { storeServices, cityServices } from '../lib/services';
+import { useAuth } from '../contexts/AuthContext'; // Import useAuth
 
 type StoreFormData = Omit<Store, 'id' | 'created_at' | 'updated_at' | 'is_verified' | 'city_id' | 'latitude' | 'longitude' | 'added_by_user_id' | 'hours_of_operation' | 'products'> & {
   cityName: string;
@@ -30,8 +31,9 @@ const initialFormData: StoreFormData = {
 
 const AddStorePage: React.FC = () => {
   const [formData, setFormData] = useState<StoreFormData>(initialFormData);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // This can be local loading state for the form submission itself
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { user } = useAuth(); // Get current user from AuthContext
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -97,7 +99,8 @@ const AddStorePage: React.FC = () => {
       };
       
       // 3. Call API to submit store data
-      const newStore = await storeServices.addStore(storePayload);
+      const submitterUserId = user ? user.id : null;
+      const newStore = await storeServices.addStore(storePayload, submitterUserId);
 
       if (newStore) {
         setMessage({ type: 'success', text: 'Store submitted successfully! It will be reviewed shortly.' });
