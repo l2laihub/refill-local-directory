@@ -22,6 +22,11 @@ This document tracks the implementation progress of the RefillLocal project, sho
   - Configured netlify.toml with build settings and redirect rules
   - Created GitHub Actions workflow for automated testing and deployment
   - Added deployment documentation to README.md
+  - Fixed Netlify deployment issues:
+    - Added proper _redirects file for SPA routing
+    - Created netlify.yaml with explicit build instructions
+    - Updated Node.js and npm version specifications
+    - Enhanced environment variable documentation
 - Optimized build process for better performance:
   - Implemented code splitting with React.lazy for all page components
   - Configured chunk optimization in Vite for smaller bundle sizes

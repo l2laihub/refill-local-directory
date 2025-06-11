@@ -2,13 +2,14 @@
 # https://docs.netlify.com/configure-builds/file-based-configuration/
 
 [build]
-  command = "npm run build"
+  command = "CI= npm run build"
   publish = "dist"
   
 # Environment variable settings
 [build.environment]
-  NODE_VERSION = "18"
-  NPM_FLAGS = "--no-audit --no-fund"
+  NODE_VERSION = "18.18.0"
+  NPM_VERSION = "10.2.4"
+  NPM_FLAGS = "--no-audit --no-fund --prefer-offline"
 
 # Production context: all deploys from the main branch
 [context.production]

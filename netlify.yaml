@@ -1,0 +1,31 @@
+# Netlify configuration in YAML format
+# This complements the netlify.toml file
+
+build:
+  environment:
+    # Explicitly set Node.js and npm versions
+    NODE_VERSION: "18.18.0"
+    NPM_VERSION: "10.2.4"
+
+  # Make sure all required tools are installed
+  install:
+    - npm ci --no-audit --no-fund --prefer-offline
+
+  # Commands for building the site
+  command: CI= npm run build
+
+  # Location of built files
+  publish: dist
+
+  # Handle SPA routing
+  functions:
+    directory: netlify/functions
+
+  # Build plugins
+  plugins:
+    - package: "@netlify/plugin-sitemap"
+      config:
+        baseUrl: "https://refilllocal.com"
+    - package: "@netlify/plugin-lighthouse"
+      config:
+        fail_deploy_on_score_thresholds: false
