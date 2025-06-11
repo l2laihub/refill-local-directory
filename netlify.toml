@@ -66,6 +66,4 @@
 [build.processing.images]
   compress = true
 
-# Custom plugins
-[[plugins]]
-  package = "/netlify/plugins/ensure-dependencies"
+# No custom plugins - using direct build script instead

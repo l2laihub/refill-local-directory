@@ -1,5 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Custom build script for Netlify deployment
+set -e # Exit immediately if a command exits with a non-zero status
 
 # Print environment information
 echo "Node version: $(node -v)"
@@ -14,23 +15,24 @@ else
   echo "node_modules exists, verifying dependencies..."
 fi
 
-# Check if vite is installed
-if ! npx vite --version > /dev/null 2>&1; then
-  echo "Vite not found, installing dependencies..."
-  npm install
-  
-  # Check again
-  if ! npx vite --version > /dev/null 2>&1; then
-    echo "Vite still not found, installing it globally..."
-    npm install -g vite
-  fi
-fi
+# Force install dependencies
+echo "Installing dependencies..."
+npm ci || npm install
+
+# Ensure vite is explicitly installed
+echo "Making sure vite is installed..."
+npm list vite || npm install vite --save-dev
+
+# Verify vite can be executed
+echo "Verifying vite can be executed..."
+npx vite --version || npm install -g vite
 
 echo "Vite version: $(npx vite --version)"
 echo "Building project..."
 
-# Run the build
-npm run build
+# Run the build with direct path to vite
+echo "Building the project..."
+npx vite build
 
 # Check build success
 if [ $? -ne 0 ]; then
