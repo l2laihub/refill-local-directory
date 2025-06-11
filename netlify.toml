@@ -2,7 +2,7 @@
 # https://docs.netlify.com/configure-builds/file-based-configuration/
 
 [build]
-  command = "CI= npm run build"
+  command = "bash ./build.sh"
   publish = "dist"
   
 # Environment variable settings
@@ -65,3 +65,7 @@
 
 [build.processing.images]
   compress = true
+
+# Custom plugins
+[[plugins]]
+  package = "/netlify/plugins/ensure-dependencies"

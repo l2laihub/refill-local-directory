@@ -12,7 +12,7 @@ build:
     - npm ci --no-audit --no-fund --prefer-offline
 
   # Commands for building the site
-  command: CI= npm run build
+  command: npm install && npm run build
 
   # Location of built files
   publish: dist

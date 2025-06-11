@@ -27,6 +27,8 @@ This document tracks the implementation progress of the RefillLocal project, sho
     - Created netlify.yaml with explicit build instructions
     - Updated Node.js and npm version specifications
     - Enhanced environment variable documentation
+    - Created custom build script (build.sh) to ensure dependencies
+    - Added custom Netlify build plugin to handle dependency verification
 - Optimized build process for better performance:
   - Implemented code splitting with React.lazy for all page components
   - Configured chunk optimization in Vite for smaller bundle sizes
