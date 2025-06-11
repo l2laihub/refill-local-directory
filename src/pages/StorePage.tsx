@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import type { Store, City } from '../lib/types';
 import analytics from '../lib/analytics';
 import { SEO } from '../lib/seo';
+import MapboxMap from '../components/MapboxMap';
 
 const StorePage: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();
@@ -281,14 +282,22 @@ const StorePage: React.FC = () => {
               </div>
             </div>
             
-            {/* Map placeholder - would be replaced with actual map in future iteration */}
+            {/* Map integration */}
             <div className="mt-8 border-t border-gray-100 pt-8">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Location</h2>
-              <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">
-                  Map integration coming in future updates
-                </p>
-              </div>
+              <MapboxMap
+                locations={[
+                  {
+                    id: store.id,
+                    name: store.name,
+                    latitude: store.latitude,
+                    longitude: store.longitude,
+                    address: store.address
+                  }
+                ]}
+                height="400px"
+                className="rounded-lg shadow-md"
+              />
             </div>
           </div>
         </div>

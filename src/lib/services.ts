@@ -3,6 +3,21 @@ import type { City, Store, WaitlistEntry, CityRequest } from './types';
 
 // City Services
 export const cityServices = {
+  // Get all cities (both active and inactive)
+  async getAllCities(): Promise<City[]> {
+    const { data, error } = await supabase
+      .from('cities')
+      .select('*')
+      .order('name');
+    
+    if (error) {
+      console.error('Error fetching all cities:', error);
+      return [];
+    }
+    
+    return data || [];
+  },
+  
   // Get all active cities
   async getActiveCities(): Promise<City[]> {
     const { data, error } = await supabase
@@ -12,7 +27,7 @@ export const cityServices = {
       .order('name');
     
     if (error) {
-      console.error('Error fetching cities:', error);
+      console.error('Error fetching active cities:', error);
       return [];
     }
     

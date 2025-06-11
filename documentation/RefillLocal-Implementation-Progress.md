@@ -37,9 +37,10 @@ This document tracks the implementation progress of the RefillLocal project, sho
 - Created CitySearch component for the homepage
 - Implemented city detail page with stores listing
 - Added analytics tracking for city searches
-
-#### ⏳ Pending
-- Add filtering options for cities
+- Implemented filtering options for cities:
+  - Added CityFilters component for filtering by region/state
+  - Added browsable city grid on homepage with filtering
+  - Integrated analytics tracking for filter interactions
 
 ### 2. Store Listings
 
@@ -51,9 +52,11 @@ This document tracks the implementation progress of the RefillLocal project, sho
 - Implemented store listing page in CityPage
 - Implemented store detail page with complete store information
 - Added analytics tracking for store views
-
-#### ⏳ Pending
-- Store map integration
+- Implemented store map integration:
+  - Added MapboxMap component for displaying store locations
+  - Integrated maps on individual store pages
+  - Added interactive map view on city pages with all stores
+  - Created responsive map toggle for mobile views
 
 #### ✅ Completed (Recently)
 - Implemented filtering and sorting options for stores:

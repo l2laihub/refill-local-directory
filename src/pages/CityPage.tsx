@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { MapPin, Globe, Clock, Phone, Mail, ExternalLink, ArrowLeft } from 'lucide-react';
+import { MapPin, Globe, Clock, Phone, Mail, ExternalLink, ArrowLeft, Map } from 'lucide-react';
 import { cityServices, storeServices } from '../lib/services';
 import type { City, Store } from '../lib/types';
 import StoreFilters, { SortOption, FilterOption } from '../components/StoreFilters';
 import { trackEvent } from '../lib/analytics';
 import { SEO } from '../lib/seo';
+import MapboxMap from '../components/MapboxMap';
+import { useMediaQuery } from '../lib/useMediaQuery';
 
 const CityPage: React.FC = () => {
   const { citySlug } = useParams<{ citySlug: string }>();
@@ -16,6 +18,8 @@ const CityPage: React.FC = () => {
   const [error, setError] = useState('');
   const [activeFilters, setActiveFilters] = useState<FilterOption[]>([]);
   const [activeSort, setActiveSort] = useState<SortOption>('name-asc');
+  const [showMap, setShowMap] = useState(false);
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
   
   useEffect(() => {
     const fetchCityData = async () => {
@@ -177,7 +181,7 @@ const CityPage: React.FC = () => {
           </button>
         </div>
         
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
             Refill Stores in {formatCityName(city.name)}
           </h1>
@@ -191,16 +195,65 @@ const CityPage: React.FC = () => {
         </div>
 
         {stores.length > 0 && (
-          <StoreFilters
-            products={allProducts}
-            activeFilters={activeFilters}
-            activeSort={activeSort}
-            onFilterChange={handleFilterChange}
-            onSortChange={handleSortChange}
-          />
+          <div className="mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+              <StoreFilters
+                products={allProducts}
+                activeFilters={activeFilters}
+                activeSort={activeSort}
+                onFilterChange={handleFilterChange}
+                onSortChange={handleSortChange}
+              />
+              
+              {!isDesktop && (
+                <button
+                  onClick={() => setShowMap(!showMap)}
+                  className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 bg-sage-100 text-sage-800 rounded-md hover:bg-sage-200 transition-colors"
+                >
+                  <Map className="h-4 w-4 mr-2" />
+                  {showMap ? 'Show List' : 'Show Map'}
+                </button>
+              )}
+            </div>
+            
+            {/* Map view for desktop (always visible) */}
+            {isDesktop && stores.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Stores in {formatCityName(city.name)}</h2>
+                <MapboxMap
+                  locations={stores.map(store => ({
+                    id: store.id,
+                    name: store.name,
+                    latitude: store.latitude,
+                    longitude: store.longitude,
+                    address: store.address
+                  }))}
+                  height="400px"
+                  className="rounded-lg shadow-md"
+                />
+              </div>
+            )}
+            
+            {/* Map view for mobile (toggled) */}
+            {!isDesktop && showMap && stores.length > 0 && (
+              <div className="mb-8">
+                <MapboxMap
+                  locations={stores.map(store => ({
+                    id: store.id,
+                    name: store.name,
+                    latitude: store.latitude,
+                    longitude: store.longitude,
+                    address: store.address
+                  }))}
+                  height="400px"
+                  className="rounded-lg shadow-md"
+                />
+              </div>
+            )}
+          </div>
         )}
         
-        <div className="mt-8">
+        <div className={!isDesktop && showMap ? 'hidden' : 'mt-8'}>
           {stores.length > 0 && filteredAndSortedStores.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAndSortedStores.map(store => (
