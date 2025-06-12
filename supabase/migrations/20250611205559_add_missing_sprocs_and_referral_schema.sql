@@ -6,11 +6,11 @@ CREATE OR REPLACE FUNCTION add_store_submission(
     p_description TEXT,
     p_address TEXT,
     p_city_id UUID,
-    p_latitude DECIMAL(10, 8),
-    p_longitude DECIMAL(11, 8),
-    p_hours_of_operation TEXT, -- Expects a string, ideally valid JSON for JSONB column
-    p_what_to_bring TEXT,
-    p_products TEXT[],
+    p_latitude DECIMAL(10, 8) DEFAULT 0,
+    p_longitude DECIMAL(11, 8) DEFAULT 0,
+    p_hours_of_operation TEXT DEFAULT NULL, -- Expects a string, ideally valid JSON for JSONB column
+    p_what_to_bring TEXT DEFAULT NULL,
+    p_products TEXT[] DEFAULT NULL,
     p_website_url TEXT DEFAULT NULL,
     p_phone TEXT DEFAULT NULL,
     p_email TEXT DEFAULT NULL,

@@ -68,13 +68,30 @@ const AddStorePage: React.FC = () => {
         return;
       }
       
-      const latitude = formData.latitudeStr ? parseFloat(formData.latitudeStr) : undefined;
-      const longitude = formData.longitudeStr ? parseFloat(formData.longitudeStr) : undefined;
+      // Parse latitude, defaulting to 0 if empty or invalid, as DB requires a number.
+      let latitude: number;
+      if (formData.latitudeStr.trim() === '') {
+        latitude = 0;
+      } else {
+        latitude = parseFloat(formData.latitudeStr);
+        if (isNaN(latitude)) {
+          setMessage({ type: 'error', text: 'Latitude must be a valid number (e.g., 34.0522) or leave blank to default to 0.' });
+          setIsLoading(false);
+          return;
+        }
+      }
 
-      if ((formData.latitudeStr && isNaN(latitude!)) || (formData.longitudeStr && isNaN(longitude!))) {
-        setMessage({ type: 'error', text: 'Latitude and Longitude must be valid numbers.' });
-        setIsLoading(false);
-        return;
+      // Parse longitude, defaulting to 0 if empty or invalid.
+      let longitude: number;
+      if (formData.longitudeStr.trim() === '') {
+        longitude = 0;
+      } else {
+        longitude = parseFloat(formData.longitudeStr);
+        if (isNaN(longitude)) {
+          setMessage({ type: 'error', text: 'Longitude must be a valid number (e.g., -118.2437) or leave blank to default to 0.' });
+          setIsLoading(false);
+          return;
+        }
       }
       
       // For now, we pass hours_of_operation as a string.
@@ -90,8 +107,8 @@ const AddStorePage: React.FC = () => {
         email: formData.email?.trim() || undefined,
         address: formData.address.trim(),
         city_id: city.id,
-        latitude: latitude!, // Asserting non-null as we'd error if string was present but unparseable
-        longitude: longitude!, // Asserting non-null
+        latitude: latitude,
+        longitude: longitude,
         hours_of_operation: formData.hours_of_operation_str.trim(), // Sending as string
         what_to_bring: formData.what_to_bring.trim(),
         products: productsArray,

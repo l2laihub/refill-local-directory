@@ -1,13 +1,13 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, Outlet } from 'react-router-dom'; // Added Outlet
 import { ShieldCheck, Users, BarChart2, Settings } from 'lucide-react'; // Example icons
 
 const AdminDashboardPage: React.FC = () => {
   const { user, isLoading } = useAuth();
 
   // Placeholder for admin role check - replace with actual role check from user object/claims
-  const isAdmin = user && user.email?.endsWith('@admin.refilllocal.com'); 
+  const isAdmin = user && user.app_metadata && user.app_metadata.user_role === 'admin';
 
   if (isLoading) {
     return <div className="p-8 text-center">Loading admin dashboard...</div>;
@@ -60,6 +60,11 @@ const AdminDashboardPage: React.FC = () => {
           </div>
           
           {/* Add more admin sections/links here */}
+        </div>
+        
+        {/* Outlet for nested admin routes */}
+        <div className="mt-8">
+          <Outlet />
         </div>
       </div>
     </div>

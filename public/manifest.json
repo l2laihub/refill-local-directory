@@ -1,0 +1,17 @@
+{
+  "name": "RefillLocal | Find Zero-Waste Shops Near You",
+  "short_name": "RefillLocal",
+  "description": "Discover refill and zero-waste stores in your area. Shop plastic-free, support local businesses, and live more sustainably with RefillLocal.com",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4A7C59",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

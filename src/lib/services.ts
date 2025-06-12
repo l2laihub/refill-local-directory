@@ -204,8 +204,6 @@ export const storeServices = {
       p_city_id: storeData.city_id,
       p_latitude: storeData.latitude,
       p_longitude: storeData.longitude,
-      // Ensure hours_of_operation is a string for the RPC call, as the form provides it as such.
-      // The SP will attempt to_jsonb conversion.
       p_hours_of_operation: typeof storeData.hours_of_operation === 'string'
         ? storeData.hours_of_operation
         : JSON.stringify(storeData.hours_of_operation),

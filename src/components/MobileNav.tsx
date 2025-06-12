@@ -25,7 +25,7 @@ const MobileNav: React.FC = () => {
   const { user, logout, isLoading: authIsLoading } = useAuth();
 
   // Determine if the user is an admin (placeholder logic)
-  const isAdmin = user && user.email?.endsWith('@admin.refilllocal.com'); // Example admin check
+  const isAdmin = user && user.app_metadata && user.app_metadata.user_role === 'admin';
   
   let navItems = [...baseNavItems];
   if (isAdmin) {
