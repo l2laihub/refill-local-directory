@@ -1,20 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react'; // Added Fragment
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { MapPin, Globe, Clock, Phone, Mail, ExternalLink, ArrowLeft, Leaf, ShoppingBag } from 'lucide-react';
+import { MapPin, Globe, Clock, Phone, Mail, ExternalLink, ArrowLeft, Leaf, ShoppingBag, Edit3 } from 'lucide-react'; // Added Edit3
 import { storeServices, cityServices } from '../lib/services';
 import { supabase } from '../lib/supabase';
 import type { Store, City } from '../lib/types';
 import analytics from '../lib/analytics';
 import { SEO } from '../lib/seo';
 import MapboxMap from '../components/MapboxMap';
+import Modal from '../components/Modal'; // Import Modal
+import StoreUpdateSuggestionForm from '../components/forms/StoreUpdateSuggestionForm'; // Import the form
+import Button from '../components/Button'; // Import Button
+import { useAuth } from '../contexts/AuthContext'; // Import useAuth
 
 const StorePage: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth(); // Get user for conditional rendering of suggest button
   const [store, setStore] = useState<Store | null>(null);
   const [city, setCity] = useState<City | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
   
   useEffect(() => {
     const fetchStoreData = async () => {
@@ -186,6 +192,18 @@ const StorePage: React.FC = () => {
               )}
             </div>
             
+            {user && ( // Only show if user is logged in
+              <div className="mt-6">
+                <Button
+                  onClick={() => setIsSuggestModalOpen(true)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <Edit3 className="mr-2 h-5 w-5" />
+                  Suggest an Update
+                </Button>
+              </div>
+            )}
+
             <div className="border-t border-gray-100 pt-6 mt-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">About</h2>
               <p className="text-gray-600 whitespace-pre-line">{store.description}</p>
@@ -302,6 +320,21 @@ const StorePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Suggest Update Modal */}
+      <Modal isOpen={isSuggestModalOpen} onClose={() => setIsSuggestModalOpen(false)} title={`Suggest an Update for ${store.name}`}>
+        {store && ( // Ensure store data is loaded before rendering form
+          <StoreUpdateSuggestionForm
+            storeId={store.id}
+            currentStoreData={store} // Pass current store data
+            onSuccess={() => {
+              setIsSuggestModalOpen(false);
+              alert('Thank you! Your suggestion has been submitted.'); // Temporary feedback
+            }}
+            onCancel={() => setIsSuggestModalOpen(false)}
+          />
+        )}
+      </Modal>
     </div>
   );
 };

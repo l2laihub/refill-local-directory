@@ -81,3 +81,18 @@ export interface CityRequest {
   votes: number;
   created_at: string;
 }
+export interface StoreUpdateSuggestion {
+  id: string;
+  store_id: string;
+  user_id: string | null;
+  suggested_changes: Record<string, any>; // Or a more specific type for changes
+  reason: string | null;
+  status: 'pending' | 'approved' | 'rejected' | 'applied';
+  created_at: string;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  store_name?: string; // Populated from joined stores table
+  user_display_name?: string; // Populated from joined users table
+  // Optional: Include user details if you plan to join and display them
+  // user?: { display_name?: string; avatar_url?: string };
+}

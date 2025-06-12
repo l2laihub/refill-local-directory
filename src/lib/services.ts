@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { City, Store, WaitlistEntry, CityRequest } from './types';
+import type { City, Store, WaitlistEntry, CityRequest, StoreUpdateSuggestion } from './types';
 
 // City Services
 export const cityServices = {
@@ -229,6 +229,111 @@ export const storeServices = {
       return null;
     }
     return data as Store | null;
+  },
+
+  // Add a new store update suggestion
+  async addStoreUpdateSuggestion(suggestionData: {
+    store_id: string;
+    user_id: string;
+    suggested_changes: Record<string, any>; // JSONB
+    reason?: string | null;
+  }): Promise<{ id: string } | null> { // Returns the ID of the new suggestion or null
+    const { data, error } = await supabase
+      .from('store_update_suggestions')
+      .insert([
+        {
+          store_id: suggestionData.store_id,
+          user_id: suggestionData.user_id,
+          suggested_changes: suggestionData.suggested_changes,
+          reason: suggestionData.reason,
+          status: 'pending', // Default status
+        },
+      ])
+      .select('id') // Select only the ID of the newly created row
+      .single(); // Expect a single row back
+
+    if (error) {
+      console.error('Error adding store update suggestion:', error);
+      throw error; // Re-throw the error to be caught by the form
+    }
+    return data;
+  },
+
+  // Get all pending store update suggestions with user and store details
+  async getPendingStoreUpdateSuggestions(): Promise<StoreUpdateSuggestion[]> {
+    const { data, error } = await supabase
+      .from('store_update_suggestions')
+      .select(`
+        *,
+        stores (name)
+      `)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching store update suggestions:', error);
+      return [];
+    }
+
+    if (!data) {
+      return [];
+    }
+
+    // TODO: Implement a robust admin-level way to fetch user display names/emails from auth.users.
+    // For now, we'll just use the user_id for attribution if available.
+    // This might involve creating a SECURITY DEFINER function in PostgreSQL and calling it via RPC.
+    return data.map(suggestion => {
+      const typedSuggestion = suggestion as any; // Helper for cleaner access to joined data
+      let userDisplayName = 'Anonymous';
+      if (typedSuggestion.user_id) {
+        // Using a truncated user_id as a temporary display name.
+        userDisplayName = `User ID: ${String(typedSuggestion.user_id).substring(0, 8)}...`;
+      }
+      
+      return {
+        ...typedSuggestion,
+        store_name: typedSuggestion.stores?.name || 'Unknown Store',
+        user_display_name: userDisplayName,
+        // Clean up joined objects if they are not part of StoreUpdateSuggestion type
+        stores: undefined,
+      };
+    }) as StoreUpdateSuggestion[];
+  },
+
+  // Approve a store update suggestion
+  async approveStoreUpdateSuggestion(suggestionId: string, adminUserId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('store_update_suggestions')
+      .update({
+        status: 'approved', // Or 'applied' if changes are made automatically
+        reviewed_by: adminUserId,
+        reviewed_at: new Date().toISOString()
+      })
+      .eq('id', suggestionId);
+
+    if (error) {
+      console.error(`Error approving store update suggestion ${suggestionId}:`, error);
+      return false;
+    }
+    return true;
+  },
+
+  // Reject a store update suggestion
+  async rejectStoreUpdateSuggestion(suggestionId: string, adminUserId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('store_update_suggestions')
+      .update({
+        status: 'rejected',
+        reviewed_by: adminUserId,
+        reviewed_at: new Date().toISOString()
+      })
+      .eq('id', suggestionId);
+
+    if (error) {
+      console.error(`Error rejecting store update suggestion ${suggestionId}:`, error);
+      return false;
+    }
+    return true;
   }
 };
 

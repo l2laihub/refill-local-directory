@@ -196,8 +196,8 @@ This document tracks the implementation progress of the RefillLocal project, sho
 
 ### Phase 3 Priorities
 1. Enhance Community Contributions:
-   - Add "Suggest Updates" feature
-   - Implement user attribution
+  - ✅ Add "Suggest Updates" feature (Users can submit suggestions; admin review pending)
+  - ✅ Implement user attribution
 2. Expand User Accounts:
    - Add personalization features
 3. Complete Content Management:
