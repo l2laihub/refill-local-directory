@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { City, Store, WaitlistEntry, CityRequest, StoreUpdateSuggestion } from './types';
+import type { City, Store, WaitlistEntry, CityRequest, StoreUpdateSuggestion, GooglePlaceSearchResultItem } from './types';
 
 // City Services
 export const cityServices = {
@@ -358,6 +358,102 @@ export const waitlistServices = {
     
     return true;
   }
+};
+
+// TODO: IMPORTANT SECURITY NOTE:
+// Calling Google Places API directly from the client-side exposes your API key.
+// For production, this key MUST be heavily restricted (e.g., to specific HTTP referrers)
+// OR these API calls should be proxied through a backend (e.g., a Supabase Edge Function)
+// where the API key is kept secret.
+// UPDATE: Now using Supabase Edge Function as a proxy.
+export const googlePlacesService = {
+  async searchStoresOnGooglePlaces(
+    query: string,
+  ): Promise<GooglePlaceSearchResultItem[]> {
+    try {
+      // Ensure supabase client is available. It's imported at the top of services.ts
+      const { data: functionResponse, error: functionError } = await supabase.functions.invoke(
+        'google-places-proxy', // Name of your Edge Function
+        {
+          body: { query }, // Pass the query in the body
+        }
+      );
+
+      if (functionError) {
+        console.error('Error invoking Supabase Edge Function google-places-proxy:', functionError);
+        let detailedError = functionError.message;
+        // Attempt to parse more specific error from functionError.context if available
+        // Supabase error context structure might vary, adjust as needed.
+        if (functionError.context && typeof functionError.context.error === 'string') {
+            detailedError = functionError.context.error;
+        } else if (functionError.context && typeof functionError.context.details === 'string') {
+            detailedError = `Google API Error (from proxy): ${functionError.context.details}`;
+        } else if (functionError.context && functionError.context.message) {
+            detailedError = functionError.context.message;
+        }
+        throw new Error(`Search via proxy failed: ${detailedError}`);
+      }
+      
+      // The Edge Function should return the direct JSON response from Google Places API
+      // or an error structure if it failed internally.
+      const googlePlacesData = functionResponse;
+
+      // Check if the functionResponse itself indicates an error passed from the Edge Function
+      if (googlePlacesData && googlePlacesData.error) {
+        console.error('Error reported by google-places-proxy Edge Function:', googlePlacesData.error, googlePlacesData.details || '');
+        throw new Error(`Search proxy error: ${googlePlacesData.error} ${googlePlacesData.details || ''}`);
+      }
+
+      if (!googlePlacesData || (googlePlacesData.status !== 'OK' && googlePlacesData.status !== 'ZERO_RESULTS')) {
+        console.error(
+          `Google Places API (via proxy) returned status ${googlePlacesData?.status || 'unknown'}: ${googlePlacesData?.error_message || 'No error message provided by proxy.'}`
+        );
+        throw new Error(`Google Places API Error (via proxy): ${googlePlacesData?.error_message || googlePlacesData?.status || 'Unknown error from proxy'}`);
+      }
+
+      if (googlePlacesData.status === 'ZERO_RESULTS' || !googlePlacesData.results || googlePlacesData.results.length === 0) {
+        return [];
+      }
+
+      // Map Google's response to our GooglePlaceSearchResultItem interface
+      return googlePlacesData.results.map((item: any): GooglePlaceSearchResultItem => ({
+        place_id: item.place_id,
+        name: item.name,
+        formatted_address: item.formatted_address,
+        geometry: item.geometry?.location
+          ? { location: { lat: item.geometry.location.lat, lng: item.geometry.location.lng } }
+          : undefined,
+        types: item.types,
+        business_status: item.business_status,
+        photos: item.photos?.map((photo: any) => ({
+          photo_reference: photo.photo_reference,
+          height: photo.height,
+          width: photo.width,
+          html_attributions: photo.html_attributions,
+        })) || [],
+        website: item.website,
+        international_phone_number: item.international_phone_number,
+        opening_hours: item.opening_hours
+          ? {
+              open_now: item.opening_hours.open_now,
+              periods: item.opening_hours.periods?.map((period: any) => ({
+                open: { day: period.open?.day, time: period.open?.time },
+                close: period.close ? { day: period.close?.day, time: period.close?.time } : undefined,
+              })),
+              weekday_text: item.opening_hours.weekday_text,
+            }
+          : undefined,
+        rating: item.rating,
+        user_ratings_total: item.user_ratings_total,
+      }));
+    } catch (error) {
+      console.error('Error calling google-places-proxy Edge Function or processing its response:', error);
+      if (error instanceof Error) {
+        throw error; // Re-throw the original error if it's already an Error instance
+      }
+      throw new Error('An unexpected error occurred during the search via proxy.');
+    }
+  },
 };
 
 // Helper function to detect if a string is a valid UUID

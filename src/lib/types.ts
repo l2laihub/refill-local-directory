@@ -63,6 +63,25 @@ export interface Store {
   is_verified: boolean;
   image_url?: string;
   added_by_user_id?: string;
+  google_place_id?: string; // For linking to Google data and reviews
+}
+
+export interface StoreReview {
+  id: string;
+  store_id: string;
+  review_id_external?: string;
+  place_id?: string;
+  author_name?: string;
+  author_id_external?: string;
+  review_text?: string;
+  rating: number;
+  review_datetime_utc: string;
+  owner_answer?: string;
+  owner_answer_datetime_utc?: string;
+  likes_count: number;
+  review_source: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface WaitlistEntry {
@@ -96,3 +115,4 @@ export interface StoreUpdateSuggestion {
   // Optional: Include user details if you plan to join and display them
   // user?: { display_name?: string; avatar_url?: string };
 }
+// Deprecated Google Places API / Importer types removed.

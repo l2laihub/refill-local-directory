@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate, Link, Outlet } from 'react-router-dom'; // Added Outlet
-import { ShieldCheck, Users, BarChart2, Settings } from 'lucide-react'; // Example icons
+import { ShieldCheck, Users, BarChart2, Settings, DatabaseZap } from 'lucide-react'; // Example icons, Added DatabaseZap
 
 const AdminDashboardPage: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -36,6 +36,16 @@ const AdminDashboardPage: React.FC = () => {
             <ShieldCheck className="w-12 h-12 text-sage-600 mb-3" />
             <h2 className="text-xl font-semibold text-gray-700">Store Moderation</h2>
             <p className="text-sm text-gray-500 mt-1">Review and approve new store submissions.</p>
+          </Link>
+
+          {/* Import Stores Link */}
+          <Link
+            to="/admin/import-stores"
+            className="bg-white shadow-lg rounded-xl p-6 hover:shadow-xl transition-shadow duration-200 flex flex-col items-center text-center"
+          >
+            <DatabaseZap className="w-12 h-12 text-teal-600 mb-3" />
+            <h2 className="text-xl font-semibold text-gray-700">Import Stores</h2>
+            <p className="text-sm text-gray-500 mt-1">Add new stores from Google Places.</p>
           </Link>
 
           {/* Placeholder: User Management */}

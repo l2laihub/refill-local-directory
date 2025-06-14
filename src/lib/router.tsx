@@ -16,6 +16,7 @@ const LoginPage = lazy(() => import('../pages/LoginPage.tsx'));
 const SignupPage = lazy(() => import('../pages/SignupPage.tsx'));
 const UserProfilePage = lazy(() => import('../pages/UserProfilePage.tsx'));
 const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage.tsx')); // Added AdminDashboardPage
+const AdminImportStoresPage = lazy(() => import('../pages/AdminImportStoresPage.tsx'));
 
 // Loading component for suspense fallback
 const PageLoader = () => (
@@ -132,6 +133,14 @@ export const router = createBrowserRouter([
                 element: (
                   <Suspense fallback={<PageLoader />}>
                     <AdminModerationPage />
+                  </Suspense>
+                ),
+              },
+              {
+                path: 'import-stores', // Path becomes /admin/import-stores
+                element: (
+                  <Suspense fallback={<PageLoader />}>
+                    <AdminImportStoresPage />
                   </Suspense>
                 ),
               },
