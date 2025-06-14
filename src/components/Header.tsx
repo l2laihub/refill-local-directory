@@ -17,12 +17,6 @@ const Header = () => (
     {/* Hero Content - Adjusted padding since nav is now part of this container */}
     <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-24 md:pt-12 md:pb-28">
       <div className="text-center">
-        {/* Logo for mobile, as DesktopNav has its own */}
-        <div className="flex justify-center mb-8 md:hidden">
-          <Link to="/">
-            <Logo size="large" />
-          </Link>
-        </div>
         
         {/* Headline */}
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-800 mb-6 leading-tight">
