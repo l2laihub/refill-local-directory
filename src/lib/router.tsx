@@ -17,6 +17,10 @@ const SignupPage = lazy(() => import('../pages/SignupPage.tsx'));
 const UserProfilePage = lazy(() => import('../pages/UserProfilePage.tsx'));
 const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage.tsx')); // Added AdminDashboardPage
 const AdminImportStoresPage = lazy(() => import('../pages/AdminImportStoresPage.tsx'));
+const AdminManageStoresPage = lazy(() => import('../pages/AdminManageStoresPage.tsx'));
+const AdminAddStorePage = lazy(() => import('../pages/AdminAddStorePage.tsx'));
+const AdminEditStorePage = lazy(() => import('../pages/AdminEditStorePage.tsx'));
+
 
 // Loading component for suspense fallback
 const PageLoader = () => (
@@ -144,10 +148,34 @@ export const router = createBrowserRouter([
                   </Suspense>
                 ),
               },
-            ]
-          },
-        ]
-      }
-    ],
+              {
+               path: 'stores', // Path becomes /admin/stores
+               element: (
+                 <Suspense fallback={<PageLoader />}>
+                   <AdminManageStoresPage />
+                 </Suspense>
+               ),
+              },
+              {
+               path: 'stores/add', // Path becomes /admin/stores/add
+               element: (
+                 <Suspense fallback={<PageLoader />}>
+                   <AdminAddStorePage />
+                 </Suspense>
+               ),
+              },
+              {
+               path: 'stores/:storeId/edit', // Path becomes /admin/stores/:storeId/edit
+               element: (
+                 <Suspense fallback={<PageLoader />}>
+                   <AdminEditStorePage />
+                 </Suspense>
+               ),
+              }
+           ]
+         },
+       ]
+     }
+   ],
   },
 ]);

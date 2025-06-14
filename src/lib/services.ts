@@ -350,6 +350,105 @@ export const storeServices = {
       return false;
     }
     return true;
+  },
+
+
+  // Get ALL stores for the main admin management page
+  async getAllStoresForAdmin(): Promise<Store[]> {
+    const { data, error } = await supabase
+      .from('stores')
+      .select('*')
+      .order('name');
+    
+    if (error) {
+      console.error('Error fetching all stores for admin:', error);
+      return [];
+    }
+    
+    return data || [];
+  },
+
+  // Update an existing store (Admin)
+  async updateStore(storeId: string, storeData: Partial<Store> & { products?: string }): Promise<Store | null> {
+    
+    const productsArray = typeof storeData.products === 'string'
+      ? storeData.products.split(',').map(p => p.trim()).filter(Boolean)
+      : (storeData.products || []); // Fallback for existing arrays
+
+    const dataToSend = {
+      ...storeData,
+      products: productsArray,
+    };
+
+    let hours = storeData.hours_of_operation;
+    if(typeof hours === 'string' && hours.trim().startsWith('{')){
+        try {
+            hours = JSON.parse(hours);
+        } catch(e) {
+            console.error("Invalid JSON for hours_of_operation on update:", hours);
+            // Decide how to handle: throw error, or set to null/default
+            hours = null;
+        }
+    } else if (typeof hours !== 'object') {
+        hours = null; // Default to empty object if not valid
+    }
+
+    const { data, error } = await supabase.rpc('update_store_by_admin', {
+      p_store_id: storeId,
+      p_store_data: { ...dataToSend, hours_of_operation: hours }
+    })
+
+    if (error) {
+      console.error(`Error updating store ${storeId}:`, error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Add a new store as a verified admin (bypasses submission queue)
+  async addStoreAsAdmin(storeData: Omit<Store, 'id' | 'created_at' | 'updated_at' | 'products'> & { products?: string }): Promise<Store | null> {
+    
+    let hours = storeData.hours_of_operation;
+    if(typeof hours === 'string' && hours.trim().startsWith('{')){
+        try {
+            hours = JSON.parse(hours);
+        } catch(e) {
+            console.error("Invalid JSON for hours_of_operation on add:", hours);
+            hours = null;
+        }
+    } else if (typeof hours !== 'object') {
+        hours = null;
+    }
+
+    const productsArray = typeof storeData.products === 'string'
+      ? storeData.products.split(',').map(p => p.trim()).filter(Boolean)
+      : [];
+
+    const params = {
+      p_name: storeData.name,
+      p_description: storeData.description,
+      p_address: storeData.address,
+      p_city_id: storeData.city_id,
+      p_latitude: storeData.latitude,
+      p_longitude: storeData.longitude,
+      p_hours_of_operation: hours,
+      p_what_to_bring: storeData.what_to_bring,
+      p_products: productsArray,
+      p_website_url: storeData.website_url || null,
+      p_phone: storeData.phone || null,
+      p_email: storeData.email || null,
+      p_image_url: storeData.image_url || null,
+      p_submitter_user_id: storeData.added_by_user_id || null,
+      p_google_place_id: storeData.google_place_id || null,
+    };
+    
+    const { data, error } = await supabase.rpc('add_store_as_admin', params);
+
+    if (error) {
+      console.error('Error adding store as admin:', error);
+      throw error;
+    }
+    return data;
   }
 };
 

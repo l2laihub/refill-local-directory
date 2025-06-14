@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate, Link, Outlet } from 'react-router-dom'; // Added Outlet
-import { ShieldCheck, Users, BarChart2, Settings, DatabaseZap } from 'lucide-react'; // Example icons, Added DatabaseZap
+import { ShieldCheck, Users, BarChart2, Settings, DatabaseZap, Warehouse } from 'lucide-react'; // Added Warehouse
 
 const AdminDashboardPage: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -48,9 +48,19 @@ const AdminDashboardPage: React.FC = () => {
             <p className="text-sm text-gray-500 mt-1">Add new stores from Google Places.</p>
           </Link>
 
-          {/* Placeholder: User Management */}
-          <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col items-center text-center opacity-50 cursor-not-allowed">
-            <Users className="w-12 h-12 text-blue-500 mb-3" />
+         {/* Manage Stores Link */}
+         <Link
+           to="/admin/stores"
+           className="bg-white shadow-lg rounded-xl p-6 hover:shadow-xl transition-shadow duration-200 flex flex-col items-center text-center"
+         >
+           <Warehouse className="w-12 h-12 text-blue-500 mb-3" />
+           <h2 className="text-xl font-semibold text-gray-700">Manage Stores</h2>
+           <p className="text-sm text-gray-500 mt-1">Add, edit, or delete store listings.</p>
+         </Link>
+
+         {/* Placeholder: User Management */}
+         <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col items-center text-center opacity-50 cursor-not-allowed">
+           <Users className="w-12 h-12 text-gray-500 mb-3" />
             <h2 className="text-xl font-semibold text-gray-700">User Management</h2>
             <p className="text-sm text-gray-500 mt-1">(Coming Soon)</p>
           </div>

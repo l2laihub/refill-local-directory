@@ -55,7 +55,7 @@ export interface Store {
   city_id: string;
   latitude: number;
   longitude: number;
-  hours_of_operation: string | StoreHoursOfOperation;
+  hours_of_operation: string | StoreHoursOfOperation | null;
   what_to_bring: string;
   products: string[];
   created_at: string;
