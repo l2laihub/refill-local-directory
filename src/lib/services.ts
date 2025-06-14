@@ -145,6 +145,22 @@ export const storeServices = {
     return data;
   },
 
+  // Get reviews by store ID
+  async getReviewsByStoreId(storeId: string): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('store_reviews')
+      .select('*')
+      .eq('store_id', storeId)
+      .order('review_datetime_utc', { ascending: false });
+
+    if (error) {
+      console.error(`Error fetching reviews for store ${storeId}:`, error);
+      return [];
+    }
+
+    return data || [];
+  },
+
   // Get all unverified stores for moderation
   async getUnverifiedStores(): Promise<Store[]> {
     const { data, error } = await supabase

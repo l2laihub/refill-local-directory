@@ -42,13 +42,25 @@ serve(async (req) => {
             });
         }
         
-        // Get the authenticated user ID from the request JWT.
-        const authHeader = req.headers.get('Authorization');
-        const jwt = authHeader?.split(' ')[1];
-        const { data: { user } } = await createClient(supabaseUrl, supabaseAnonKey).auth.getUser(jwt);
+        // When a function is called from a client, it doesn't automatically know who the user is.
+        // We need to create a new client with the user's auth token to verify them.
+        const authHeader = req.headers.get('Authorization')!;
+        const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+          global: { headers: { Authorization: authHeader } },
+        });
+
+        const { data: { user }, error: getUserError } = await authClient.auth.getUser();
+
+        if (getUserError) {
+            console.error('Error fetching user:', getUserError);
+        }
 
         if (!user) {
-             return new Response(JSON.stringify({ error: 'Authentication required to import stores.' }), {
+            console.error('Authentication failed: No user object was returned. This may be due to an invalid JWT or a misconfigured JWT secret in your local Supabase setup.');
+            return new Response(JSON.stringify({
+                error: 'Authentication failed. Could not verify user.',
+                details: getUserError?.message || 'No user object returned from auth provider. Check function logs.'
+            }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 401,
             });
@@ -59,6 +71,8 @@ serve(async (req) => {
             city_id: targetCityId,
             added_by_user_id: user.id,
             is_verified: true, // Assuming admin-imported stores are automatically verified
+            what_to_bring: 'Please contact the store for information on what to bring.',
+            products: [], // Default to an empty array for products
         }));
         
         const { data, error } = await supabase

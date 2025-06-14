@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { corsHeaders } from '../_shared/cors.ts'
-import { read, utils } from 'https://deno.land/x/xlsx/xlsx.mjs';
+import { read, utils } from 'https://esm.sh/xlsx@0.18.5';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { Store, StoreHoursOfOperation } from '../../../src/lib/types.ts';
 
@@ -228,10 +228,9 @@ serve(async (req) => {
             validForImportCount: processedResult.validForImport.length,
             duplicateCount: processedResult.duplicates.length,
             errorCount: processedResult.errors.length,
-            // Optionally return the data for frontend preview
-            // validForImport: processedResult.validForImport, 
-            // duplicates: processedResult.duplicates,
-            // errors: processedResult.errors,
+            validForImport: processedResult.validForImport,
+            duplicates: processedResult.duplicates,
+            errors: processedResult.errors,
         }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,

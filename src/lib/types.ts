@@ -115,4 +115,24 @@ export interface StoreUpdateSuggestion {
   // Optional: Include user details if you plan to join and display them
   // user?: { display_name?: string; avatar_url?: string };
 }
-// Deprecated Google Places API / Importer types removed.
+
+// Re-adding the type required by the Google Places service
+export interface GooglePlaceSearchResultItem {
+  place_id: string;
+  name: string;
+  formatted_address: string;
+  geometry?: {
+    location: {
+      lat: number;
+      lng: number;
+    };
+  };
+  types?: string[];
+  business_status?: string;
+  photos?: any[];
+  website?: string;
+  international_phone_number?: string;
+  opening_hours?: any;
+  rating?: number;
+  user_ratings_total?: number;
+}

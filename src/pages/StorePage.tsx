@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MapPin, Globe, Clock, Phone, Mail, ExternalLink, ArrowLeft, Leaf, ShoppingBag, Edit3 } from 'lucide-react'; // Added Edit3
 import { storeServices, cityServices } from '../lib/services';
 import { supabase } from '../lib/supabase';
-import type { Store, City } from '../lib/types';
+import type { Store, City, StoreReview } from '../lib/types';
 import analytics from '../lib/analytics';
 import { SEO } from '../lib/seo';
 import MapboxMap from '../components/MapboxMap';
@@ -20,6 +20,7 @@ const StorePage: React.FC = () => {
   const [city, setCity] = useState<City | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [reviews, setReviews] = useState<StoreReview[]>([]);
   const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
   
   useEffect(() => {
@@ -38,6 +39,11 @@ const StorePage: React.FC = () => {
         
         setStore(storeData);
         
+        // Fetch reviews for this store
+        const reviewData = await storeServices.getReviewsByStoreId(storeId);
+        setReviews(reviewData as StoreReview[]);
+
+
         // Track store view with analytics
         analytics.trackStoreView(storeData.id, storeData.name);
         
@@ -299,11 +305,42 @@ const StorePage: React.FC = () => {
                 ))}
               </div>
             </div>
-            
-            {/* Map integration */}
-            <div className="mt-8 border-t border-gray-100 pt-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Location</h2>
-              <MapboxMap
+
+           {/* Reviews Section */}
+           {reviews.length > 0 && (
+             <div className="mt-8 border-t border-gray-100 pt-8">
+               <h2 className="text-xl font-semibold text-gray-800 mb-4">Reviews</h2>
+               <div className="space-y-6">
+                 {reviews.map((review) => (
+                   <div key={review.id} className="flex space-x-4">
+                     <div className="flex-shrink-0">
+                       <div className="h-10 w-10 rounded-full bg-sage-100 flex items-center justify-center">
+                         <span className="text-sage-600 font-semibold">{review.author_name ? review.author_name.charAt(0) : '?'}</span>
+                       </div>
+                     </div>
+                     <div className="flex-1">
+                       <div className="flex items-center justify-between">
+                         <p className="font-semibold text-gray-900">{review.author_name || 'Anonymous'}</p>
+                         <div className="flex items-center">
+                           {[...Array(5)].map((_, i) => (
+                             <svg key={i} className={`h-5 w-5 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
+                               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.368-2.448a1 1 0 00-1.175 0l-3.368 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.051 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z" />
+                             </svg>
+                           ))}
+                         </div>
+                       </div>
+                       <p className="text-gray-600 mt-2">{review.review_text}</p>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             </div>
+           )}
+           
+           {/* Map integration */}
+           <div className="mt-8 border-t border-gray-100 pt-8">
+             <h2 className="text-xl font-semibold text-gray-800 mb-4">Location</h2>
+             <MapboxMap
                 locations={[
                   {
                     id: store.id,

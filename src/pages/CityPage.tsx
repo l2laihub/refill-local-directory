@@ -83,7 +83,7 @@ const CityPage: React.FC = () => {
     let result = stores;
     
     if (activeFilters.length > 0) {
-      result = result.filter(store => 
+      result = result.filter(store =>
         activeFilters.some(filter => store.products.includes(filter))
       );
     }
@@ -257,17 +257,18 @@ const CityPage: React.FC = () => {
           {stores.length > 0 && filteredAndSortedStores.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAndSortedStores.map(store => (
-                <Link 
+                <Link
                   key={store.id}
                   to={`/stores/${store.id}`}
                   className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
                 >
                   {store.image_url ? (
                     <div className="h-48 overflow-hidden">
-                      <img 
-                        src={store.image_url} 
-                        alt={store.name} 
+                      <img
+                        src={store.image_url}
+                        alt={store.name}
                         className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
                       />
                     </div>
                   ) : (
@@ -289,8 +290,8 @@ const CityPage: React.FC = () => {
                       <div className="flex items-start mb-2">
                         <Clock className="h-5 w-5 text-gray-500 mr-2 mt-0.5" />
                         <span className="text-gray-600 text-sm">
-                          {typeof store.hours_of_operation === 'string' 
-                            ? store.hours_of_operation 
+                          {typeof store.hours_of_operation === 'string'
+                            ? store.hours_of_operation
                             : 'See store details for hours'}
                         </span>
                       </div>
